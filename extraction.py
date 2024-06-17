@@ -1,0 +1,2 @@
+def extract_files(df, format, filepath, splitno, headereq, compressiontype):
+    df.coalesce(splitno).write.mode('overwrite').format(format).save(filepath, header=headereq, compression=compressiontype)

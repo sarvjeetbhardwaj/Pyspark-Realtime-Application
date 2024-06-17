@@ -16,3 +16,6 @@ current_dir = os.getcwd()
 bucket_name = 'pyspark-relatime-app'
 src_olap = 'olap'
 src_oltp = 'oltp'
+
+city_path = 'output/cities'
+presc_path = 'output/prescriber'

@@ -6,6 +6,7 @@ import sys
 from ingest import load_files,display_df,df_count,copy_read_file
 from data_processing import data_clean
 from data_transformation import *
+from extraction import extract_files
 
 
 def main():
@@ -46,11 +47,21 @@ def main():
 
         check_for_nulls(df=df_presc_sel, df_name='df_presc_sel')
 
-        df_report = data_report(df_city_sel=df_city_sel, df_presc_sel=df_presc_sel)
+        df_report1 = data_report(df_city_sel=df_city_sel, df_presc_sel=df_presc_sel)
 
-        display_df(df_report)
+        df_report2 = data_report2(df_presc_sel = df_presc_sel)
 
+        display_df(df_report1)
 
+        display_df(df_report2)
+
+        city_path = get_env_variables.city_path
+
+        extract_files(df=df_report1, format='orc', filepath=city_path, splitno=1, headereq=False, compressiontype='snappy')
+
+        presc_path = get_env_variables.presc_path
+
+        extract_files(df=df_report2, format='parquet', filepath=presc_path, splitno=2, headereq=False, compressiontype='snappy')
 
     except Exception as e:
         print(f'An exception occured in driver-main function --{e}')
