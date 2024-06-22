@@ -7,6 +7,7 @@ from ingest import load_files,display_df,df_count,copy_read_file
 from data_processing import data_clean
 from data_transformation import *
 from extraction import extract_files
+from persist import *
 
 
 def main():
@@ -47,22 +48,23 @@ def main():
 
         check_for_nulls(df=df_presc_sel, df_name='df_presc_sel')
 
-        df_report1 = data_report(df_city_sel=df_city_sel, df_presc_sel=df_presc_sel)
+        df_city = data_report(df_city_sel=df_city_sel, df_presc_sel=df_presc_sel)
+        df_presc = data_report2(df_presc_sel = df_presc_sel)
 
-        df_report2 = data_report2(df_presc_sel = df_presc_sel)
-
-        display_df(df_report1)
-
-        display_df(df_report2)
+        display_df(df_city)
+        display_df(df_presc)
 
         city_path = get_env_variables.city_path
-
-        extract_files(df=df_report1, format='orc', filepath=city_path, splitno=1, headereq=False, compressiontype='snappy')
+        extract_files(df=df_city, format='orc', filepath=city_path, splitno=1, headereq=False, compressiontype='snappy')
 
         presc_path = get_env_variables.presc_path
+        extract_files(df=df_presc, format='parquet', filepath=presc_path, splitno=2, headereq=False, compressiontype='snappy')
 
-        extract_files(df=df_report2, format='parquet', filepath=presc_path, splitno=2, headereq=False, compressiontype='snappy')
-
+        print('Data being written into hive ............... ')
+        data_hive_persist_cities(spark=spark, df=df_city, dfname='df_city', partitionBy='state_name', mode='append')
+        data_hive_persist_prescibers(spark=spark, df=df_presc, dfname='df_presc', partitionBy='presc_state', mode='append')
+        print('Data writtten into hive metastore completed')
+        
     except Exception as e:
         print(f'An exception occured in driver-main function --{e}')
     
